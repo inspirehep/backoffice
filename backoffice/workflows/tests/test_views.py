@@ -12,8 +12,8 @@ class TestWorkflowViewSet(TestCase):
     endpoint = "/api/workflows/"
 
     def setUp(self):
-        self.curator_group = Group.objects.create(name="curator")
-        self.admin_group = Group.objects.create(name="admin")
+        self.curator_group, _ = Group.objects.get_or_create(name="curator")
+        self.admin_group, _ = Group.objects.get_or_create(name="admin")
 
         self.curator = User.objects.create_user(email="curator@test.com", password="12345")
         self.admin = User.objects.create_user(email="admin@test.com", password="12345")
