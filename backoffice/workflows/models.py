@@ -7,9 +7,10 @@ class Workflow(models.Model):
     DEFAULT_STATUS_CHOICE = "PREPROCESSING"
     DEFAULT_WORKFLOW_TYPE = "HEP_create"
     STATUS_CHOICES = (
-        ("PREPROCESSING", "Preprocessing"),
-        ("APPROVAL", "Approval"),
-        ("POSTPROCESSING", "Postprocessing"),
+        ("running", "Running"),
+        ("approval", "Waiting for approval"),
+        ("completed", "Completed"),
+        ("error", "Error"),
     )
 
     WORKFLOW_TYPES = (
