@@ -27,6 +27,8 @@ class Workflow(models.Model):
         default=DEFAULT_STATUS_CHOICE,
     )
     core = models.BooleanField()
+
+    url = models.URLField()
     is_update = models.BooleanField()
 
 

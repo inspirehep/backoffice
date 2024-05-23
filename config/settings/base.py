@@ -100,7 +100,7 @@ THIRD_PARTY_APPS = [
     "django_prometheus",
 ]
 
-LOCAL_APPS = ["backoffice.users", "backoffice.workflows", "backoffice.management"]
+LOCAL_APPS = ["backoffice.users", "backoffice.workflows", "backoffice.management", "backoffice.submission"]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 

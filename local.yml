@@ -24,6 +24,7 @@ services:
     command: sh -c 'poetry run python manage.py migrate && poetry run python manage.py runserver 0.0.0.0:8000'
     networks:
       - djangonetwork
+      - shared-network
 
   postgres:
     build:
@@ -83,3 +84,5 @@ services:
 networks:
   djangonetwork:
     driver: bridge
+  shared-network:
+    external: true
