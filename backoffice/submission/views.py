@@ -68,3 +68,14 @@ class SubmissionViewSet(viewsets.ViewSet):
         return Response({'message': 'workflow triggered successfully',
                          'data':response.content,
                          'status_code':response.status_code}, status=status.HTTP_200_OK)
+    
+    @action(detail=False, methods=['post'])
+    def authorrejection(self, request):
+
+        data = request.data
+
+        response = airflow_utils.trigger_airflow_dag('author_create_rejected_dag',data['id'])
+
+        return Response({'message': 'workflow triggered successfully',
+                         'data':response.content,
+                         'status_code':response.status_code}, status=status.HTTP_200_OK)
