@@ -8,6 +8,10 @@ from . import airflow_utils
 
 from .serializers import AuthorSubmissionSerializer
 
+from django.apps import apps
+Workflow = apps.get_model(app_label="workflows", model_name="Workflow")
+# from workflows.models import Workflow
+
 class SubmissionViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['post'])
@@ -17,41 +21,16 @@ class SubmissionViewSet(viewsets.ViewSet):
         serializer = AuthorSubmissionSerializer(data=request.data)
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # authentication?
 
-        headers_django = {
-    "Content-Type": "application/json",
-    "Authorization": "Token 8b73f491a7da43e428ca88ca796c13d07f6fbd6d"
-}
+        # create workflow entry
+        workflow = Workflow.objects.create(
+            data=serializer.validated_data, 
+            status="approval",
+            core=True, is_update=False, url="https://www.unusedfield.com",workflow_type="AUTHOR_CREATE")
 
-        # # this data does not need to be this complete yet
-        data =   {
-            "workflow_type": "AUTHOR_CREATE",
-            "data": None,
-            "status": "running",
-            "core": False,
-            "is_update": False,
-            "url":"https://www.unusedfield.com"
-            }
-
-        data['data'] = serializer.validated_data
-
-        request_url = 'http://localhost:8000/api/workflows/'
-        response = requests.post(request_url, json=data, headers=headers_django, timeout=10)
-        if response.status_code != 201:
-            return Response({  'message': 'request to django api failed',
-                                'request': {'url':response,'data':data},
-                                'response':{
-                                            'code':response.status_code,
-                                            'data':response.json()}
-                                            },
-                                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        print('Triggering dag')
-
-        
+        print('Triggering dag')        
         # response id, corresponds to the new workflow id
-        response = airflow_utils.trigger_airflow_dag('author_create_initialization_dag',response.json()['id'])
+        response = airflow_utils.trigger_airflow_dag('author_create_initialization_dag',str(workflow.id))
 
         return Response({'message': 'workflow triggered successfully',
                          'data':response.content,
