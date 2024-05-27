@@ -37,7 +37,7 @@ urlpatterns += [
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
     ),
-    path('', include('submission.urls')),  # Include the app's URLs
+    path('', include('backoffice.submission.urls')),  # Include the app's URLs
 ]
 
 if settings.DEBUG:
