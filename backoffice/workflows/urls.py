@@ -1,7 +1,12 @@
 from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+from backoffice.workflows.api.views import WorflowSubmissionViewSet
 
-from backoffice.config.api_router import router
+app_name = 'workflow-submissions'
+
+router = DefaultRouter()
+router.register(r"workflow", WorflowSubmissionViewSet, basename="workflow-submissionsss")
 
 urlpatterns = [
-    path("api/", include(router.urls)),
+    path("", include(router.urls), name= "workflow-submissions"),
 ]

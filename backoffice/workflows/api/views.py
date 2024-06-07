@@ -1,11 +1,12 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import status, viewsets
 from rest_framework.response import Response
-
+from rest_framework.decorators import action
 from backoffice.workflows.models import Workflow, WorkflowTicket
 
 from .serializers import WorkflowSerializer, WorkflowTicketSerializer
 
+from backoffice.workflows import airflow_utils
 
 class WorkflowViewSet(viewsets.ModelViewSet):
     queryset = Workflow.objects.all()
@@ -65,3 +66,45 @@ class WorkflowTicketViewSet(viewsets.ViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+class WorflowSubmissionViewSet(viewsets.ViewSet):
+
+    @action(detail=False, methods=['post'])
+    def submit(self, request):
+
+        # TODO workflow submission serializer
+
+        # create workflow entry
+        workflow = Workflow.objects.create(
+            data=request.data, 
+            status="approval",
+            core=True, is_update=False,workflow_type="AUTHOR_CREATE")
+
+        print('Triggering dag')        
+        # response id, corresponds to the new workflow id
+        response = airflow_utils.trigger_airflow_dag('author_create_initialization_dag',str(workflow.id))
+
+        return Response({'data':response.content,
+                         'status_code':response.status_code}, status=status.HTTP_200_OK)
+
+    @action(detail=False, methods=['post'])
+    def resolve(self, request):
+
+        data = request.data
+        create_ticket = data['create_ticket']
+        resolution = data['resolution']
+        extra_data = {'create_ticket':create_ticket, 'resolution': resolution}
+
+        if resolution == 'accept':
+            dag_name = 'author_create_approved_dag'
+        elif resolution == 'reject':
+            dag_name = 'author_create_rejected_dag'
+        else:
+            return Response(
+                {'message':'resolution method unrecognized'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        response = airflow_utils.trigger_airflow_dag(dag_name, data['id'], extra_data)
+
+        return Response({'data':response.content,
+                         'status_code':response.status_code}, status=status.HTTP_200_OK)
