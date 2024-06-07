@@ -4,9 +4,13 @@ from rest_framework import status, viewsets
 from rest_framework.response import Response
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 from rest_framework.decorators import action
 =======
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
+=======
+from rest_framework.decorators import action
+>>>>>>> 3808204 (submissions: basic workflow permissions)
 
 >>>>>>> 71ed612 (search: minor fixes on elastic search implementation)
 from backoffice.workflows.models import Workflow, WorkflowTicket
@@ -82,6 +86,9 @@ class WorkflowTicketViewSet(viewsets.ViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 3808204 (submissions: basic workflow permissions)
 class WorflowSubmissionViewSet(viewsets.ViewSet):
 
     @action(detail=False, methods=['post'])
@@ -123,7 +130,11 @@ class WorflowSubmissionViewSet(viewsets.ViewSet):
 
         return Response({'data':response.content,
                          'status_code':response.status_code}, status=status.HTTP_200_OK)
+<<<<<<< HEAD
 =======
+=======
+
+>>>>>>> 3808204 (submissions: basic workflow permissions)
 
 class WorkflowDocumentView(BaseDocumentViewSet):
     def __init__(self, *args, **kwargs):
