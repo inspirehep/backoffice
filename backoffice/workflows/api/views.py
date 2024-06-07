@@ -1,6 +1,8 @@
 from django.shortcuts import get_object_or_404
+from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from rest_framework import status, viewsets
 from rest_framework.response import Response
+<<<<<<< HEAD
 <<<<<<< HEAD
 from rest_framework.decorators import action
 =======
@@ -9,8 +11,14 @@ from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 >>>>>>> 71ed612 (search: minor fixes on elastic search implementation)
 from backoffice.workflows.models import Workflow, WorkflowTicket
 from backoffice.workflows.documents import WorkflowDocument
+=======
+
+>>>>>>> 25c3ca7 (search: linted files)
 from backoffice.utils.pagination import OSStandardResultsSetPagination
-from .serializers import WorkflowSerializer, WorkflowTicketSerializer, WorkflowDocumentSerializer
+from backoffice.workflows.documents import WorkflowDocument
+from backoffice.workflows.models import Workflow, WorkflowTicket
+
+from .serializers import WorkflowDocumentSerializer, WorkflowSerializer, WorkflowTicketSerializer
 
 from backoffice.workflows import airflow_utils
 
