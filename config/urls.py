@@ -28,6 +28,7 @@ if settings.DEBUG:
 # API URLS
 urlpatterns += [
     # API base url
+    path("api/", include("config.search_router")),
     path("api/", include("config.api_router")),
     # DRF auth token
     path("auth-token/", obtain_auth_token),
@@ -36,12 +37,7 @@ urlpatterns += [
         "api/docs/",
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
-    ),
-<<<<<<< HEAD
-    path("api/", include("backoffice.workflows.urls", namespace="workflow-submission")),
-=======
-    path("api/search/", include("config.search_router")),
->>>>>>> 71ed612 (search: minor fixes on elastic search implementation)
+    )
 ]
 
 if settings.DEBUG:
