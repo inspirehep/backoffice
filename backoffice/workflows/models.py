@@ -27,7 +27,6 @@ class Workflow(models.Model):
         default=DEFAULT_STATUS_CHOICE,
     )
     core = models.BooleanField()
-    is_update = models.BooleanField()
 
     _created_at = models.DateTimeField(auto_now_add=True)
     _updated_at = models.DateTimeField(auto_now=True)
