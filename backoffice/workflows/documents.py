@@ -11,7 +11,6 @@ class WorkflowDocument(Document):
     workflow_type = fields.KeywordField()
     data = fields.ObjectField()
     status = fields.KeywordField()
-    is_update = fields.BooleanField()
 
     class Index:
         name = settings.OPENSEARCH_INDEX_NAMES[__name__]

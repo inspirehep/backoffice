@@ -79,11 +79,7 @@ class WorkflowDocumentView(BaseDocumentViewSet):
     serializer_class = WorkflowSerializer
     pagination_class = OSStandardResultsSetPagination
 
-    search_fields = {
-        "workflow_type",
-        "status",
-        "is_update",
-    }
+    search_fields = {"workflow_type", "status"}
     ordering = ["_updated_at"]
 
     def get_serializer_class(self):

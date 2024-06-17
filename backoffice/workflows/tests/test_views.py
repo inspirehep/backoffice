@@ -37,7 +37,7 @@ class TestWorkflowViewSet(BaseTransactionTestCase):
 
     def setUp(self):
         super().setUp()
-        self.workflow = Workflow.objects.create(data={}, status="approval", core=True, is_update=False)
+        self.workflow = Workflow.objects.create(data={}, status="approval", core=True)
 
     def test_list_curator(self):
         self.api_client.force_authenticate(user=self.curator)
@@ -70,7 +70,7 @@ class TestWorkflowSearchViewSet(BaseTransactionTestCase):
         super().setUp()
         index = Index("backoffice-backend-test-workflows")
         index.delete(ignore=[400, 404])
-        self.workflow = Workflow.objects.create(data={}, status="approval", core=True, is_update=False)
+        self.workflow = Workflow.objects.create(data={}, status="approval", core=True)
 
     def test_list_curator(self):
         self.api_client.force_authenticate(user=self.curator)
@@ -100,7 +100,7 @@ class TestWorkflowPartialUpdateViewSet(BaseTransactionTestCase):
 
     def setUp(self):
         super().setUp()
-        self.workflow = Workflow.objects.create(data={}, status="approval", core=True, is_update=False)
+        self.workflow = Workflow.objects.create(data={}, status="approval", core=True)
 
     @property
     def endpoint(self):
@@ -139,7 +139,7 @@ class TestWorkflowTicketViewSet(BaseTransactionTestCase):
 
     def setUp(self):
         super().setUp()
-        self.workflow = Workflow.objects.create(data={}, status="running", core=True, is_update=False)
+        self.workflow = Workflow.objects.create(data={}, status="running", core=True)
         self.workflow_ticket = WorkflowTicket.objects.create(
             workflow_id=self.workflow, ticket_id="123", ticket_type="author_create_user"
         )
