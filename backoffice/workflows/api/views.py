@@ -9,7 +9,13 @@ from backoffice.workflows import airflow_utils
 from backoffice.workflows.documents import WorkflowDocument
 from backoffice.workflows.models import Workflow, WorkflowTicket
 
-from .serializers import WorkflowDocumentSerializer, WorkflowSerializer, WorkflowTicketSerializer
+from ..constants import WORKFLOW_DAG, ResolutionDags
+from .serializers import (
+    AuthorResolutionSerializer,
+    WorkflowDocumentSerializer,
+    WorkflowSerializer,
+    WorkflowTicketSerializer,
+)
 
 
 class WorkflowViewSet(viewsets.ModelViewSet):
@@ -72,43 +78,25 @@ class WorkflowTicketViewSet(viewsets.ViewSet):
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class WorflowSubmissionViewSet(viewsets.ViewSet):
-    @action(detail=False, methods=["post"])
-    def submit(self, request):
+class AuthorWorkflowViewSet(viewsets.ViewSet):
+    serializer_class = WorkflowSerializer
 
-        # TODO workflow submission serializer
-
-        # create workflow entry
-        workflow = Workflow.objects.create(
-            data=request.data, status="approval", core=True, is_update=False, workflow_type="AUTHOR_CREATE"
-        )
-
-        print("Triggering dag")
-        # response id, corresponds to the new workflow id
-        response = airflow_utils.trigger_airflow_dag("author_create_initialization_dag", str(workflow.id))
-
-        return Response({"data": response.content, "status_code": response.status_code}, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=["post"])
-    def resolve(self, request):
-
-        data = request.data
-        create_ticket = data["create_ticket"]
-        resolution = data["resolution"]
-        extra_data = {"create_ticket": create_ticket, "resolution": resolution}
-
-        if resolution == "accept":
-            dag_name = "author_create_approved_dag"
-        elif resolution == "reject":
-            dag_name = "author_create_rejected_dag"
-        else:
-            return Response(
-                {"message": "resolution method unrecognized"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+    def create(self, request):
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            workflow = Workflow.objects.create(
+                data=serializer.validated_data["data"], workflow_type=serializer.validated_data["workflow_type"]
             )
+        return airflow_utils.trigger_airflow_dag(WORKFLOW_DAG[workflow.workflow_type], str(workflow.id), workflow.data)
 
-        response = airflow_utils.trigger_airflow_dag(dag_name, data["id"], extra_data)
-
-        return Response({"data": response.content, "status_code": response.status_code}, status=status.HTTP_200_OK)
+    @action(detail=True, methods=["post"])
+    def resolve(self, request, pk=None):
+        serializer = AuthorResolutionSerializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            extra_data = {"create_ticket": serializer.validated_data["create_ticket"]}
+            return airflow_utils.trigger_airflow_dag(
+                ResolutionDags[serializer.validated_data["value"]].label, pk, extra_data
+            )
 
 
 class WorkflowDocumentView(BaseDocumentViewSet):

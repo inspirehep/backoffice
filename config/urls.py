@@ -38,7 +38,6 @@ urlpatterns += [
         SpectacularSwaggerView.as_view(url_name="api-schema"),
         name="api-docs",
     ),
-    path("api/", include("backoffice.workflows.urls", namespace="workflow-submission")),
 ]
 
 if settings.DEBUG:
