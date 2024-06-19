@@ -20,7 +20,7 @@ services:
       - ./.envs/local/.django
       - ./.envs/local/.postgres
     ports:
-      - "8000:8000"
+      - "8001:8000"
     command: sh -c 'poetry run python manage.py migrate && poetry run python manage.py runserver 0.0.0.0:8000'
     networks:
       - djangonetwork
@@ -32,7 +32,7 @@ services:
     image: backoffice_production_postgres
     container_name: backoffice_local_postgres
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - backoffice_postgres_data:/var/lib/postgresql/data
       - backoffice_postgres_data_backups:/backups
@@ -76,7 +76,7 @@ services:
     restart: "always"
     container_name: backoffice_local_mq
     ports:
-      - "5672:5672"
+      - "5673:5672"
     networks:
       - djangonetwork
 
@@ -102,9 +102,9 @@ services:
         hard: 65536
     mem_limit: 2g
     ports:
-      - 9200:9200
-      - 9300:9300
-      - 9600:9600 # performance analysis
+      - 9201:9200
+      - 9301:9300
+      - 9601:9600 # performance analysis
     networks:
       - djangonetwork
 
