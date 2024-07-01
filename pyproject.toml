@@ -133,7 +133,7 @@ django-cors-headers = "4.2.0"
 drf-spectacular = "0.26.5"
 Werkzeug = {version = "3.0.0", extras = ["watchdog"]}
 ipdb = "0.13.13"
-psycopg = {version = "3.1.12", extras = ["c"]}
+psycopg = {version = "3.2.1", extras = ["c"]}
 watchfiles = "0.20.0"
 gunicorn = "21.2.0"
 Collectfast = "2.2.0"
