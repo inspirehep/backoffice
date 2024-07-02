@@ -1,12 +1,15 @@
 from django.shortcuts import get_object_or_404
 from django_elasticsearch_dsl_drf.viewsets import BaseDocumentViewSet
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from backoffice.utils.pagination import OSStandardResultsSetPagination
+from backoffice.workflows import airflow_utils
 from backoffice.workflows.documents import WorkflowDocument
 from backoffice.workflows.models import Workflow, WorkflowTicket
 
+from ..constants import WORKFLOW_TYPES
 from .serializers import WorkflowDocumentSerializer, WorkflowSerializer, WorkflowTicketSerializer
 
 
@@ -68,6 +71,43 @@ class WorkflowTicketViewSet(viewsets.ViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
             return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AuthorWorkflowViewSet(viewsets.ViewSet):
+    def create(self, request):
+
+        workflow = Workflow.objects.create(data=request.data["data"], workflow_type=request.data["workflow_type"])
+        serializer = WorkflowSerializer(workflow)
+
+        if workflow.workflow_type == WORKFLOW_TYPES[2][0]:
+            dag_name = "author_create_initialization_dag"
+        elif workflow.workflow_type == WORKFLOW_TYPES[3][0]:
+            dag_name = "author_update_dag"
+        else:
+            return Response({"message": "workflow_type unrecognized"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        return airflow_utils.trigger_airflow_dag(dag_name, str(workflow.id), serializer.data)
+
+    @action(detail=True, methods=["post"])
+    def resolve(self, request, pk=None):
+
+        data = request.data
+        create_ticket = data["create_ticket"]
+        resolution = data["value"]
+        extra_data = {"create_ticket": create_ticket, "resolution": resolution}
+
+        if resolution == "accept":
+            dag_name = "author_create_approved_dag"
+        elif resolution == "reject":
+            dag_name = "author_create_rejected_dag"
+        else:
+            return Response(
+                {"message": "resolution method unrecognized"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        response = airflow_utils.trigger_airflow_dag(dag_name, pk, extra_data)
+
+        return Response({"data": response.content, "status_code": response.status_code}, status=status.HTTP_200_OK)
 
 
 class WorkflowDocumentView(BaseDocumentViewSet):
