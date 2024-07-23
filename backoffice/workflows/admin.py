@@ -1,8 +1,8 @@
 from django.contrib import admin
+from django_json_widget.widgets import JSONEditorWidget
 
 from backoffice.management.permissions import IsAdminOrCuratorUser
-
-from .models import Workflow
+from backoffice.workflows.models import Workflow
 
 
 class WorkflowsAdminSite(admin.AdminSite):
@@ -33,6 +33,10 @@ class WorkflowAdmin(admin.ModelAdmin):
     """
     Admin class for Workflow model. Define get, update and delete permissions.
     """
+
+    formfield_overrides = {
+        "data": {"widget": JSONEditorWidget},
+    }
 
     ordering = ("-_updated_at",)
     search_fields = ["id", "data"]
