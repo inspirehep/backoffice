@@ -1,3 +1,7 @@
+from allauth.socialaccount.providers.orcid.views import oauth2_callback
+from dj_rest_auth.jwt_auth import get_refresh_view
+from dj_rest_auth.registration.views import RegisterView
+from dj_rest_auth.views import LoginView, LogoutView, UserDetailsView
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -7,7 +11,11 @@ from django.views import defaults as default_views
 from django.views.generic import TemplateView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+    TokenVerifyView,
+)
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
@@ -27,7 +35,16 @@ if settings.DEBUG:
 
 # API URLS
 urlpatterns += [
+    path("api/register/", RegisterView.as_view(), name="rest_register"),
+    path("api/login/", LoginView.as_view(), name="rest_login"),
+    path("api/logout/", LogoutView.as_view(), name="rest_logout"),
+    path("api/user/", UserDetailsView.as_view(), name="rest_user_details"),
+    path("api/token/verify/", TokenVerifyView.as_view(), name="token_verify"),
+    path("api/token/refresh/", get_refresh_view().as_view(), name="token_refresh"),
     # API base url
+    path(
+        "api/oauth/authorized/orcid/", oauth2_callback, name="orcid_callback"
+    ),  # Custom ORCID callback URL
     path("api/", include("config.search_router")),
     path("api/", include("config.api_router")),
     # DRF auth token

@@ -106,6 +106,8 @@ THIRD_PARTY_APPS = [
     "django_elasticsearch_dsl_drf",
     "rest_framework_simplejwt",
     "django_json_widget",
+    "dj_rest_auth",
+    "dj_rest_auth.registration",
 ]
 
 LOCAL_APPS = ["backoffice.users", "backoffice.workflows", "backoffice.management"]
@@ -379,7 +381,8 @@ SOCIALACCOUNT_PROVIDERS = {
             "client_id": env("ORCID_CLIENT_ID", default=""),
             "secret": env("ORCID_CLIENT_SECRET", default=""),
             "key": "",
-        }
+        },
+        "BASE_DOMAIN": "sandbox.orcid.org",
     }
 }
 
@@ -397,3 +400,8 @@ OPENSEARCH_DSL = {
 
 # Workaround because it wont add the connection settings automatically
 connections.configure(default=OPENSEARCH_DSL["default"])
+
+REST_AUTH = {
+    "USE_JWT": True,
+    "JWT_AUTH_HTTPONLY": False,
+}
