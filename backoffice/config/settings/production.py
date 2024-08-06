@@ -201,7 +201,7 @@ sentry_sdk.init(
 # -------------------------------------------------------------------------------
 # Tools that generate code samples can use SERVERS to point to the correct domain
 SPECTACULAR_SETTINGS["SERVERS"] = [  # noqa: F405
-    {"url": "https://example.com", "description": "Production server"},
+    {"url": "https://backoffice.dev.inspirebeta.net", "description": "QA server"},
 ]
 
 # Opensearch
