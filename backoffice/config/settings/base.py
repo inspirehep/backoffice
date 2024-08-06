@@ -106,8 +106,6 @@ THIRD_PARTY_APPS = [
     "django_elasticsearch_dsl_drf",
     "rest_framework_simplejwt",
     "django_json_widget",
-    "dj_rest_auth",
-    "dj_rest_auth.registration",
 ]
 
 LOCAL_APPS = ["backoffice.users", "backoffice.workflows", "backoffice.management"]
@@ -129,7 +127,7 @@ AUTHENTICATION_BACKENDS = [
 # https://docs.djangoproject.com/en/dev/ref/settings/#auth-user-model
 AUTH_USER_MODEL = "users.User"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-redirect-url
-LOGIN_REDIRECT_URL = "users:redirect"
+LOGIN_REDIRECT_URL = "users:login_success"
 # https://docs.djangoproject.com/en/dev/ref/settings/#login-url
 LOGIN_URL = "account_login"
 
@@ -382,7 +380,7 @@ SOCIALACCOUNT_PROVIDERS = {
             "secret": env("ORCID_CLIENT_SECRET", default=""),
             "key": "",
         },
-        "BASE_DOMAIN": "sandbox.orcid.org",
+        "BASE_DOMAIN": env("ORCID_BASE_DOMAIN", default=""),
     }
 }
 
@@ -400,8 +398,3 @@ OPENSEARCH_DSL = {
 
 # Workaround because it wont add the connection settings automatically
 connections.configure(default=OPENSEARCH_DSL["default"])
-
-REST_AUTH = {
-    "USE_JWT": True,
-    "JWT_AUTH_HTTPONLY": False,
-}

@@ -1,9 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.http import JsonResponse
 from django.urls import reverse
 from django.utils.translation import gettext_lazy as _
 from django.views.generic import DetailView, RedirectView, UpdateView
+from rest_framework_simplejwt.tokens import RefreshToken
 
 User = get_user_model()
 
@@ -43,3 +45,13 @@ class UserRedirectView(LoginRequiredMixin, RedirectView):
 
 
 user_redirect_view = UserRedirectView.as_view()
+
+
+def user_login_success(request):
+    refresh = RefreshToken.for_user(request.user)
+    return JsonResponse(
+        data={
+            "refresh": str(refresh),
+            "access": str(refresh.access_token),
+        }
+    )

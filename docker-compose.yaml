@@ -95,7 +95,6 @@ services:
     volumes:
       - ./backoffice:/app:z
     env_file:
-      - .env
       - ./backoffice/.envs/local/.django
       - ./backoffice/.envs/local/.postgres
     ports:

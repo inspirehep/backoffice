@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from django.conf import settings
 from django.contrib import messages
@@ -12,7 +14,12 @@ from django.utils.translation import gettext_lazy as _
 from backoffice.users.forms import UserAdminChangeForm
 from backoffice.users.models import User
 from backoffice.users.tests.factories import UserFactory
-from backoffice.users.views import UserRedirectView, UserUpdateView, user_detail_view
+from backoffice.users.views import (
+    UserRedirectView,
+    UserUpdateView,
+    user_detail_view,
+    user_login_success,
+)
 
 pytestmark = pytest.mark.django_db
 
@@ -94,3 +101,16 @@ class TestUserDetailView:
         assert isinstance(response, HttpResponseRedirect)
         assert response.status_code == 302
         assert response.url == f"{login_url}?next=/fake-url/"
+
+
+class TestLoginSuccess:
+    def test_login_success(self, user: User, rf: RequestFactory):
+        request = rf.get("/fake-url/")
+        request.user = AnonymousUser()
+        response = user_login_success(request)
+
+        response_json = json.loads(response.content)
+
+        assert response.status_code == 200
+        assert "refresh" in response_json
+        assert "access" in response_json
