@@ -104,13 +104,18 @@ class TestUserDetailView:
 
 
 class TestLoginSuccess:
-    def test_login_success(self, user: User, rf: RequestFactory):
+    def test_login_jwt_success(self, user: User, rf: RequestFactory):
         request = rf.get("/fake-url/")
         request.user = AnonymousUser()
         response = user_login_success(request)
+        assert response.status_code == 403
+
+    def test_login_jwt_failure(self, user: User, rf: RequestFactory):
+        request = rf.get("/fake-url/")
+        request.user = user
+        response = user_login_success(request)
+        assert response.status_code == 200
 
         response_json = json.loads(response.content)
-
-        assert response.status_code == 200
         assert "refresh" in response_json
         assert "access" in response_json
