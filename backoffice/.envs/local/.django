@@ -22,3 +22,6 @@ OPENSEARCH_INDEX_PREFIX=backoffice-backend-local
 # Airflow
 AIRFLOW_BASE_URL=http://airflow-webserver:8080
 AIRFLOW_TOKEN=YWlyZmxvdzphaXJmbG93
+
+#orcid
+ORCID_BASE_DOMAIN=sandbox.orcid.org

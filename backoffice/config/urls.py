@@ -1,3 +1,4 @@
+from allauth.socialaccount.providers.orcid.views import oauth2_callback
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -27,6 +28,7 @@ if settings.DEBUG:
 
 # API URLS
 urlpatterns += [
+    path("api/oauth/authorized/orcid/", oauth2_callback, name="orcid_callback"),
     # API base url
     path("api/", include("config.search_router")),
     path("api/", include("config.api_router")),
