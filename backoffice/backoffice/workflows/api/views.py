@@ -278,7 +278,7 @@ class WorkflowDocumentView(BaseDocumentViewSet):
             "options": {
                 "size": 10,
                 "order": {
-                    "_key": "desc",
+                    "_key": "asc",
                 },
             },
             "enabled": True,
