@@ -1,7 +1,7 @@
 from django_elasticsearch_dsl_drf.filter_backends import (
-    SimpleQueryStringSearchFilterBackend,
+    MultiMatchSearchFilterBackend,
 )
 
 
-class CustomSimpleQueryStringSearchFilterBackend(SimpleQueryStringSearchFilterBackend):
+class CustomMultiMatchSearchFilterBackend(MultiMatchSearchFilterBackend):
     search_param = "search"
