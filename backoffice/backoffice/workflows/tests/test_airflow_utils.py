@@ -16,7 +16,7 @@ class TestAirflowUtils(TransactionTestCase):
         self.workflow_type = WorkflowType.AUTHOR_CREATE
         self.dag_id = WORKFLOW_DAGS[self.workflow_type].initialize
         self.response = airflow_utils.trigger_airflow_dag(
-            self.dag_id, str(self.workflow_id)
+            self.dag_id, str(self.workflow_id), {"test": "test"}
         )
 
     def tearDown(self):
@@ -67,7 +67,12 @@ class TestAirflowUtils(TransactionTestCase):
 
     @pytest.mark.vcr()
     def test_delete_workflow_dag_runs(self):
-        response = airflow_utils.delete_workflow_dag_runs(
+        airflow_utils.delete_workflow_dag_runs(self.workflow_id, self.workflow_type)
+
+    @pytest.mark.vcr()
+    def test_fetch_data_workflow_dag(self):
+        result = airflow_utils.fetch_data_workflow_dag(
             self.workflow_id, self.workflow_type
         )
-        self.assertEqual(response.status_code, 200)
+
+        self.assertEqual(result, {"test": "test"})
