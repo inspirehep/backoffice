@@ -2,7 +2,6 @@ import logging
 
 from django.shortcuts import get_object_or_404
 from django_elasticsearch_dsl_drf.filter_backends import (
-    CompoundSearchFilterBackend,
     DefaultOrderingFilterBackend,
     FacetedSearchFilterBackend,
     FilteringFilterBackend,
@@ -21,6 +20,9 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+from backoffice.backoffice.workflows.api.filter_backends import (
+    CustomSimpleQueryStringSearchFilterBackend,
+)
 from backoffice.utils.pagination import OSStandardResultsSetPagination
 from backoffice.workflows import airflow_utils
 from backoffice.workflows.api import utils
@@ -255,23 +257,15 @@ class WorkflowDocumentView(BaseDocumentViewSet):
         self.search = self.search.extra(track_total_hits=True)
 
     document = WorkflowDocument
-    serializer_class = WorkflowSerializer
+    serializer_class = WorkflowDocumentSerializer
     pagination_class = OSStandardResultsSetPagination
     filter_backends = [
+        CustomSimpleQueryStringSearchFilterBackend,
         DefaultOrderingFilterBackend,
-        CompoundSearchFilterBackend,
         FacetedSearchFilterBackend,
         FilteringFilterBackend,
         OrderingFilterBackend,
     ]
-    search_fields = {
-        "data.ids.value",
-        "data.ids.schema",
-        "data.name.value",
-        "data.name.preferred_name",
-        "data.email_addresses.value",
-    }
-
     filter_fields = {
         "status": "status",
         "workflow_type": "workflow_type",
@@ -281,6 +275,10 @@ class WorkflowDocumentView(BaseDocumentViewSet):
     ordering_fields = {"_updated_at": "_updated_at", "_score": "_score"}
 
     ordering = ("-_updated_at", "-_score")
+
+    search_fields = (
+        "*",  # The asterisk (*) searches across all fields
+    )
 
     faceted_search_fields = {
         "status": {
@@ -307,6 +305,3 @@ class WorkflowDocumentView(BaseDocumentViewSet):
             "enabled": True,
         },
     }
-
-    def get_serializer_class(self):
-        return WorkflowDocumentSerializer
