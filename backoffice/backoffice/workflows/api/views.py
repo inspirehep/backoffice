@@ -276,7 +276,7 @@ class WorkflowDocumentView(BaseDocumentViewSet):
 
     ordering = ("-_updated_at", "-_score")
 
-    search_fields = ("data.*.keyword",)
+    search_fields = ("data.*.value", "data.*.keyword")
 
     faceted_search_fields = {
         "status": {
