@@ -20,12 +20,12 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
-from backoffice.backoffice.workflows.api.filter_backends import (
-    CustomSimpleQueryStringSearchFilterBackend,
-)
 from backoffice.utils.pagination import OSStandardResultsSetPagination
 from backoffice.workflows import airflow_utils
 from backoffice.workflows.api import utils
+from backoffice.workflows.api.filter_backends import (
+    CustomMultiMatchSearchFilterBackend,
+)
 from backoffice.workflows.api.serializers import (
     AuthorResolutionSerializer,
     WorkflowAuthorSerializer,
@@ -260,7 +260,7 @@ class WorkflowDocumentView(BaseDocumentViewSet):
     serializer_class = WorkflowDocumentSerializer
     pagination_class = OSStandardResultsSetPagination
     filter_backends = [
-        CustomSimpleQueryStringSearchFilterBackend,
+        CustomMultiMatchSearchFilterBackend,
         DefaultOrderingFilterBackend,
         FacetedSearchFilterBackend,
         FilteringFilterBackend,
@@ -276,9 +276,7 @@ class WorkflowDocumentView(BaseDocumentViewSet):
 
     ordering = ("-_updated_at", "-_score")
 
-    search_fields = (
-        "*",  # The asterisk (*) searches across all fields
-    )
+    search_fields = ("data.*.keyword",)
 
     faceted_search_fields = {
         "status": {
