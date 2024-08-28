@@ -93,7 +93,7 @@ class TestWorkflowViewSet(BaseTransactionTestCase):
 
     def test_tickets(self):
         WorkflowTicket.objects.create(
-            workflow_id=self.workflow, ticket_id="123", ticket_type="author_create_user"
+            workflow=self.workflow, ticket_id="123", ticket_type="author_create_user"
         )
         workflow_data = WorkflowSerializer(self.workflow).data
 
@@ -242,7 +242,7 @@ class TestWorkflowTicketViewSet(BaseTransactionTestCase):
             data={}, status="running", core=True, is_update=False
         )
         self.workflow_ticket = WorkflowTicket.objects.create(
-            workflow_id=self.workflow, ticket_id="123", ticket_type="author_create_user"
+            workflow=self.workflow, ticket_id="123", ticket_type="author_create_user"
         )
 
     def test_get_missing_params(self):
@@ -294,7 +294,7 @@ class TestWorkflowTicketViewSet(BaseTransactionTestCase):
 
         assert response.status_code == 400
         assert response.json() == {
-            "workflow_id": ["This field is required."],
+            "workflow": ["This field is required."],
             "ticket_id": ["This field is required."],
         }
 
@@ -302,7 +302,7 @@ class TestWorkflowTicketViewSet(BaseTransactionTestCase):
         self.api_client.force_authenticate(user=self.curator)
 
         data = {
-            "workflow_id": self.workflow.id,
+            "workflow": str(self.workflow.id),
             "ticket_id": "dc94caad1b4f71502d06117a3b4bcb25",
             "ticket_type": "author_create_user",
         }
@@ -312,7 +312,7 @@ class TestWorkflowTicketViewSet(BaseTransactionTestCase):
 
         assert response.status_code == 201
 
-        assert "workflow_id" in response.data
+        assert "workflow" in response.data
         assert "ticket_id" in response.data
         assert "ticket_type" in response.data
 

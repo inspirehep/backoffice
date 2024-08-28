@@ -36,7 +36,7 @@ class Workflow(models.Model):
 
 
 class WorkflowTicket(models.Model):
-    workflow_id = models.ForeignKey(
+    workflow = models.ForeignKey(
         Workflow, related_name="tickets", on_delete=models.CASCADE
     )
     ticket_id = models.CharField(
