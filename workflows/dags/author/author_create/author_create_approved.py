@@ -102,6 +102,7 @@ def author_create_approved_dag():
         status = get_wf_status_from_inspire_response(response)
         if response.ok:
             control_number = response.json()["metadata"]["control_number"]
+            logger.info(f"Created author with control number: {control_number}")
             workflow_data["data"]["control_number"] = control_number
             workflow_management_hook.partial_update_workflow(
                 workflow_id=context["params"]["workflow_id"],
