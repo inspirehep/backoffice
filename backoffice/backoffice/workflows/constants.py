@@ -4,6 +4,7 @@ from django.db import models
 TICKET_TYPES = (
     ("author_create_curation", "Author create curation"),
     ("author_create_user", "Author create user"),
+    ("author_update_curation", "Author update curation"),
 )
 DEFAULT_TICKET_TYPE = "author_create_curation"
 
