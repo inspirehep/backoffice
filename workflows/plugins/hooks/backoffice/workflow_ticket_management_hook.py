@@ -40,7 +40,7 @@ class WorkflowTicketManagementHook(BackofficeHook):
         data = {
             "ticket_type": ticket_type,
             "ticket_id": ticket_id,
-            "workflow_id": workflow_id,
+            "workflow": workflow_id,
         }
         return self.run_with_advanced_retry(
             _retry_args=self.tenacity_retry_kwargs,
