@@ -19,13 +19,13 @@ class Workflow(models.Model):
 
     workflow_type = models.CharField(
         max_length=30,
-        choices=WorkflowType,
+        choices=WorkflowType.choices,
         default=DEFAULT_WORKFLOW_TYPE,
     )
     data = models.JSONField()
     status = models.CharField(
         max_length=30,
-        choices=StatusChoices,
+        choices=StatusChoices.choices,
         default=DEFAULT_STATUS_CHOICE,
     )
     core = models.BooleanField(default=False)

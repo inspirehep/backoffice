@@ -37,7 +37,7 @@ class ResolutionDags(models.TextChoices):
     accept_curate = "accept_curate", "author_create_approved_dag"
 
 
-DECISION_CHOICES = ResolutionDags
+DECISION_CHOICES = ResolutionDags.choices
 
 
 class AuthorCreateDags(models.TextChoices):
