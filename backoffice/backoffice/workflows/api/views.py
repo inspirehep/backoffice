@@ -209,6 +209,7 @@ class AuthorWorkflowViewSet(viewsets.ViewSet):
                 workflow.id, workflow.workflow_type
             )
 
+        Decision.objects.filter(workflow=workflow).delete()
         return airflow_utils.restart_workflow_dags(
             workflow.id, workflow.workflow_type, request.data.get("params")
         )

@@ -330,7 +330,7 @@ class TestAuthorWorkflowViewSet(BaseTransactionTestCase):
         super().setUp()
 
         self.workflow = Workflow.objects.create(
-            data={},
+            data={"test": "test"},
             status="running",
             core=True,
             is_update=False,
@@ -424,8 +424,8 @@ class TestAuthorWorkflowViewSet(BaseTransactionTestCase):
             kwargs={"pk": self.workflow.id},
         )
         response = self.api_client.post(url)
-
         self.assertEqual(response.status_code, 200)
+        self.assertIn("test", response.json()["conf"]["data"])
 
     @pytest.mark.vcr()
     def test_restart_a_task(self):
@@ -435,7 +435,7 @@ class TestAuthorWorkflowViewSet(BaseTransactionTestCase):
             kwargs={"pk": self.workflow.id},
         )
         response = self.api_client.post(
-            url, json={"task_ids": ["set_workflow_status_to_running"]}
+            url, format="json", data={"restart_current_task": True}
         )
         self.assertEqual(response.status_code, 200)
 
@@ -446,9 +446,8 @@ class TestAuthorWorkflowViewSet(BaseTransactionTestCase):
             "api:workflows-authors-restart",
             kwargs={"pk": self.workflow.id},
         )
-
         response = self.api_client.post(
-            url, json={"params": {"workflow_id": self.workflow.id}}
+            url, format="json", data={"params": {"workflow_id": self.workflow.id}}
         )
         self.assertEqual(response.status_code, 200)
 

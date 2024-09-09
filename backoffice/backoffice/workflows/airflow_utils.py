@@ -156,10 +156,12 @@ def restart_workflow_dags(workflow_id, workflow_type, params=None):
     :param params: parameters of new dag execution
     :returns: request response
     """
+
+    data = fetch_data_workflow_dag(workflow_id, workflow_type)
     delete_workflow_dag_runs(workflow_id, workflow_type)
 
     return trigger_airflow_dag(
-        WORKFLOW_DAGS[workflow_type].initialize, str(workflow_id), params
+        WORKFLOW_DAGS[workflow_type].initialize, str(workflow_id), params or data
     )
 
 
@@ -171,9 +173,19 @@ def delete_workflow_dag_runs(workflow_id, workflow_type):
     """
     executed_dags_for_workflow = find_executed_dags(workflow_id, workflow_type)
 
-    for dag_id in executed_dags_for_workflow:
+    for dag_id, _ in executed_dags_for_workflow.items():
         delete_workflow_dag(dag_id, str(workflow_id))
 
-    return JsonResponse(
-        data={"message": f"Dag runs for worfklow {workflow_id} have been deleted"}
-    )
+
+def fetch_data_workflow_dag(workflow_id, workflow_type):
+    """Fetches Data that the workflow ran with
+
+    :param workflow_id: workflow_id for dag to get data of
+    :param workflow_type: type of workflow
+    :returns: data workflow dags used
+    """
+
+    executed_dags_for_workflow = find_executed_dags(workflow_id, workflow_type)
+
+    _, dag = next(iter(executed_dags_for_workflow.items()))
+    return dag["conf"].get("data")
