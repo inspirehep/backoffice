@@ -1,3 +1,4 @@
+from allauth.socialaccount.providers.orcid.views import oauth2_login
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
@@ -8,6 +9,8 @@ from django.views.generic import TemplateView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.views.decorators.csrf import csrf_exempt
+
 
 urlpatterns = [
     path("", TemplateView.as_view(template_name="pages/home.html"), name="home"),
@@ -18,6 +21,7 @@ urlpatterns = [
     path(settings.ADMIN_URL, admin.site.urls),
     # User management
     path("users/", include("backoffice.users.urls", namespace="users")),
+    path("accounts/orcid/login/", csrf_exempt(oauth2_login), name="orcid_login"),
     path("accounts/", include("allauth.urls")),
     path("", include("django_prometheus.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
@@ -40,6 +44,7 @@ urlpatterns += [
     ),
     path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
     path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("api/_allauth/", include("allauth.headless.urls")),
 ]
 
 
