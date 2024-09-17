@@ -1,5 +1,4 @@
 target-version = "py311"
-lint.ignore = ["PT009"]
 
 [lint.flake8-tidy-imports]
 ban-relative-imports = "all"
@@ -26,6 +25,7 @@ select = [
     "AIR",
 
 ]
+ignore = ["PT009"]
 
 
 [lint.pycodestyle]
