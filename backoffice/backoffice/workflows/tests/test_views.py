@@ -357,17 +357,16 @@ class TestAuthorWorkflowViewSet(BaseTransactionTestCase):
             "workflow_type": WorkflowType.AUTHOR_CREATE,
             "status": "running",
             "data": {
-                "native_name": "NATIVE_NAME",
-                "alternate_name": "NAME",
-                "display_name": "FIRST_NAME",
-                "family_name": "LAST_NAME",
-                "given_name": "GIVEN_NAME",
+                "name": {
+                    "value": "John, Snow",
+                },
+                "_collections": ["Authors"],
+                "$schema": "https://inspirehep.net/schemas/records/authors.json",
             },
         }
 
         url = reverse("api:workflows-authors-list")
         response = self.api_client.post(url, format="json", data=data)
-
         self.assertEqual(response.status_code, 201)
         self.assertEqual(response.json(), data)
 
@@ -450,6 +449,80 @@ class TestAuthorWorkflowViewSet(BaseTransactionTestCase):
             url, format="json", data={"params": {"workflow_id": self.workflow.id}}
         )
         self.assertEqual(response.status_code, 200)
+
+    @pytest.mark.vcr()
+    def test_validate_valid_record(self):
+        self.api_client.force_authenticate(user=self.curator)
+        data = {
+            "name": {
+                "value": "John, Snow",
+            },
+            "_collections": ["Authors"],
+            "$schema": "https://inspirehep.net/schemas/records/authors.json",
+        }
+        url = reverse(
+            "api:workflows-authors-validate",
+        )
+        response = self.api_client.post(url, format="json", data=data)
+        self.assertContains(response, "Record is valid.", status_code=200)
+
+    @pytest.mark.vcr()
+    def test_validate_not_valid_record(self):
+        self.api_client.force_authenticate(user=self.curator)
+        data = {
+            "name": {
+                "value": "Gooding, James, James Andrew, Jamie.",
+                "name_variants": ["James Andrew"],
+            },
+            "$schema": "https://inspirehep.net/schemas/records/authors.json",
+            "_collections": ["Authors"],
+        }
+        url = reverse(
+            "api:workflows-authors-validate",
+        )
+        response = self.api_client.post(url, format="json", data=data)
+        expected_response = {
+            "message": [
+                {
+                    "message": (
+                        "'Gooding, James, James Andrew, Jamie.' "
+                        "does not match '^[^,]+(,[^,]+)?(,?[^,]+)?$'"
+                    ),
+                    "path": ["name", "value"],
+                },
+            ]
+        }
+        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.json(), expected_response)
+
+    @pytest.mark.vcr()
+    def test_validate_no_schema_record(self):
+        self.api_client.force_authenticate(user=self.curator)
+        url = reverse(
+            "api:workflows-authors-validate",
+        )
+        response = self.api_client.post(url, format="json", data={})
+        self.assertContains(
+            response,
+            'Unable to find \\"$schema\\" key in',
+            status_code=400,
+        )
+
+    @pytest.mark.vcr()
+    def test_validate_invalid_schema_record(self):
+        self.api_client.force_authenticate(user=self.curator)
+        data = {
+            "$schema": "https://inspirehep.net/schemas/records/notajsonschema.json",
+        }
+        url = reverse(
+            "api:workflows-authors-validate",
+        )
+        response = self.api_client.post(url, format="json", data=data)
+        self.assertContains(
+            response,
+            text='Unable to find schema \\"https://inspirehep.net/schemas/records/notajsonschema.json\\"',
+            status_code=400,
+        )
 
 
 class TestWorkflowSearchFilterViewSet(BaseTransactionTestCase):
