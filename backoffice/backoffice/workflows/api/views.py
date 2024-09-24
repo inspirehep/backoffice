@@ -16,6 +16,8 @@ from drf_spectacular.utils import (
     extend_schema,
     extend_schema_view,
 )
+from inspire_schemas.errors import SchemaKeyNotFound, SchemaNotFound
+from inspire_schemas.utils import get_validation_errors
 from opensearch_dsl import TermsFacet
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -107,6 +109,19 @@ class DecisionViewSet(viewsets.ModelViewSet):
 class AuthorWorkflowViewSet(viewsets.ViewSet):
     serializer_class = WorkflowAuthorSerializer
 
+    def render_validation_error_response(self, validation_errors):
+        validation_errors_messages = [
+            {
+                "message": error.message,
+                "path": list(error.path),
+            }
+            for error in validation_errors
+        ]
+        return Response(
+            {"message": validation_errors_messages},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
     @extend_schema(
         summary="Create/Update an Author",
         description="Creates/Updates an author, launches the required airflow dags.",
@@ -116,10 +131,15 @@ class AuthorWorkflowViewSet(viewsets.ViewSet):
         logger.info("Creating workflow with data: %s", request.data)
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid(raise_exception=True):
-            workflow = Workflow.objects.create(
-                data=serializer.validated_data["data"],
-                workflow_type=serializer.validated_data["workflow_type"],
-            )
+            logger.info("Validating data against given schema: %s", request.data)
+            validation_errors = list(get_validation_errors(request.data.get("data")))
+            if validation_errors:
+                return self.render_validation_error_response(validation_errors)
+        logger.info("Data passed schema validation, creating workflow.")
+        workflow = Workflow.objects.create(
+            data=serializer.validated_data["data"],
+            workflow_type=serializer.validated_data["workflow_type"],
+        )
         logger.info(
             "Trigger Airflow DAG: %s for %s",
             WORKFLOW_DAGS[workflow.workflow_type].initialize,
@@ -157,7 +177,7 @@ class AuthorWorkflowViewSet(viewsets.ViewSet):
 
     @extend_schema(
         summary="Accept or Reject Author",
-        description="Acceps or rejects an author, run associated dags.",
+        description="Accepts or rejects an author, run associated dags.",
         request=AuthorResolutionSerializer,
     )
     @action(detail=True, methods=["post"])
@@ -212,6 +232,100 @@ class AuthorWorkflowViewSet(viewsets.ViewSet):
         Decision.objects.filter(workflow=workflow).delete()
         return airflow_utils.restart_workflow_dags(
             workflow.id, workflow.workflow_type, request.data.get("params")
+        )
+
+    @extend_schema(
+        summary="Validate record",
+        description="Validate record against given schema in JSON.",
+        examples=[
+            OpenApiExample(
+                name="Valid record",
+                description="Example of a valid author record submission.",
+                request_only=True,
+                value={
+                    "name": {"value": "John, Snow"},
+                    "_collections": ["Authors"],
+                    "$schema": "https://inspirehep.net/schemas/records/authors.json",
+                },
+            ),
+            OpenApiExample(
+                name="Valid record response",
+                description="The response when the record is valid.",
+                response_only=True,
+                status_codes=["200"],
+                value={"message": "Record is valid."},
+            ),
+            OpenApiExample(
+                name="Invalid record",
+                description="Example of failing schema validation.",
+                request_only=True,
+                value={
+                    "name": "",
+                    "affiliations": "CERN",
+                    "$schema": "https://inspirehep.net/schemas/records/authors.json",
+                    "email": "invalid-email-format",
+                },
+            ),
+            OpenApiExample(
+                name="Invalid record response",
+                description="The response when the record contains validation errors.",
+                response_only=True,
+                status_codes=["400"],
+                value={
+                    "message": [
+                        {
+                            "message": (
+                                "Additional properties are not allowed"
+                                "('affiliations', 'email' were unexpected)"
+                            ),
+                            "path": [],
+                        },
+                        {"message": "'' is not of type 'object'", "path": ["name"]},
+                        {
+                            "message": "'_collections' is a required property",
+                            "path": [],
+                        },
+                    ]
+                },
+            ),
+            OpenApiExample(
+                name="Schema not found",
+                description="Example where the schema for validation cannot be found.",
+                request_only=True,
+                value={
+                    "name": {"value": "John, Snow"},
+                    "_collections": ["Authors"],
+                },
+            ),
+            OpenApiExample(
+                name="Schema not found response",
+                description="The response when the schema is not available.",
+                response_only=True,
+                status_codes=["400"],
+                value={"message": 'Unable to find "$schema" key in...'},
+            ),
+        ],
+    )
+    @action(detail=False, methods=["post"])
+    def validate(self, request):
+        try:
+            record_data = request.data
+            validation_errors = list(get_validation_errors(record_data))
+            if validation_errors:
+                return self.render_validation_error_response(validation_errors)
+        except (SchemaNotFound, SchemaKeyNotFound) as e:
+            return Response(
+                {"message": str(e)},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as e:
+            return Response(
+                {"message": f"An unexpected error occurred: {str(e)}"},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+        return Response(
+            {"message": "Record is valid."},
+            status=status.HTTP_200_OK,
         )
 
 
