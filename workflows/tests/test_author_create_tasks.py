@@ -1,4 +1,5 @@
 import pytest
+
 from dags.author.author_create.shared_tasks import (
     close_author_create_user_ticket,
 )
