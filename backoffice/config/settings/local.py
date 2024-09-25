@@ -82,6 +82,6 @@ SOCIALACCOUNT_PROVIDERS = {
             "client_id": env("ORCID_CLIENT_ID", default=""),
             "secret": env("ORCID_CLIENT_SECRET", default=""),
         },
-        "BASE_DOMAIN": "sandbox.orcid.org"
+        "BASE_DOMAIN": "sandbox.orcid.org",
     }
 }
