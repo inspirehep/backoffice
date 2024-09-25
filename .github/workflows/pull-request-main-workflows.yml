@@ -10,7 +10,7 @@ jobs:
   lint:
     uses: ./.github/workflows/lint.yml
     with:
-      ref: ${{ github.ref }}
+      ref: ${{ github.event.pull_request.head.sha }}
   test:
     needs: lint
     uses: ./.github/workflows/test-workflows.yml
