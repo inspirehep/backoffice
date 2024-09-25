@@ -70,3 +70,18 @@ CELERY_TASK_EAGER_PROPAGATES = True
 # ------------------------------------------------------------------------------
 # http://whitenoise.evans.io/en/latest/django.html#using-whitenoise-in-development
 INSTALLED_APPS = ["whitenoise.runserver_nostatic"] + INSTALLED_APPS  # noqa: F405
+
+# ORCID
+# ----------
+SOCIALACCOUNT_PROVIDERS = {
+    "orcid": {
+        # For each OAuth based provider, either add a ``SocialApp``
+        # (``socialaccount`` app) containing the required client
+        # credentials, or list them here:
+        "APP": {
+            "client_id": env("ORCID_CLIENT_ID", default=""),
+            "secret": env("ORCID_CLIENT_SECRET", default=""),
+        },
+        "BASE_DOMAIN": "sandbox.orcid.org"
+    }
+}
